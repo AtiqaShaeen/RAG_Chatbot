@@ -119,6 +119,10 @@ def upload_document():
         if not documents:
             return jsonify({"error": "Could not extract text from the document"}), 400
 
+        # Keep only the current upload in the vector store.
+        # This removes previously indexed chunks before inserting the new ones.
+        vector_store.reset()
+
         # Generate embeddings — same EmbeddingManager as notebook
         texts = [doc.page_content for doc in documents]
         embeddings = embedding_manager.generate_embeddings(texts)
@@ -132,7 +136,7 @@ def upload_document():
                 "filename": filename,
                 "chunks_loaded": len(documents),
                 "total_documents": vector_store.get_count(),
-                "message": f"Successfully loaded '{filename}' with {len(documents)} chunk(s).",
+                "message": f"Successfully loaded '{filename}' with {len(documents)} chunk(s). Previous document was cleared.",
             }
         )
 
